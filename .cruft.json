@@ -1,0 +1,18 @@
+{
+  "template": "https://github.com/woltapp/wolt-python-package-cookiecutter",
+  "commit": "6669a067eeaaed3bee84312428a3e94cd13295f2",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "author_name": "IceBotYT",
+      "author_email": "icebotyt@outlook.com",
+      "github_username": "IceBotYT",
+      "project_name": "pynoonlight",
+      "project_slug": "pynoonlight",
+      "package_name": "pynoonlight",
+      "project_short_description": "Create and update alarms for Noonlight",
+      "_template": "https://github.com/woltapp/wolt-python-package-cookiecutter"
+    }
+  },
+  "directory": null
+}
