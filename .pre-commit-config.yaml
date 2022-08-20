@@ -32,7 +32,9 @@ repos:
         types: [python]
       - id: pyupgrade
         name: pyupgrade
-        entry: poetry run pyupgrade --py37-plus
+        # This causes the "unsupported operand type(s) for |: 'type' and 'NoneType'" error to occur
+        # I added the --keep-runtime-typing flag to stop this from happening
+        entry: poetry run pyupgrade --py37-plus --keep-runtime-typing
         language: system
         types: [python]
       - id: mypy

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional, Union
 from urllib.parse import urlparse
 
 import requests
@@ -19,7 +19,7 @@ async def _send_request(
     method: str,
     url: str,
     headers: dict[str, str],
-    payload: dict[Any, Any] | list[dict[Any, Any]],
+    payload: Union[dict[Any, Any], list[dict[Any, Any]]],
     expected_code: int,
 ) -> requests.Response:
     response = requests.request(method, url, headers=headers, json=payload)
@@ -38,7 +38,7 @@ class InvalidURLError(Exception):
 
 class Address(BaseModel):
     line1: str
-    line2: str | None
+    line2: Optional[str]
     city: str
     state: str
     zip: str
@@ -68,17 +68,17 @@ class Instructions(BaseModel):
 class AlarmData(BaseModel):
     name: str
     phone: str
-    pin: str | None
-    owner_id: str | None
-    location: Address | Coordinates
-    workflow: Workflow | None
-    services: Services | None
-    instructions: Instructions | None
+    pin: Optional[str]
+    owner_id: Optional[str]
+    location: Union[Address, Coordinates]
+    workflow: Optional[Workflow]
+    services: Optional[Services]
+    instructions: Optional[Instructions]
 
 
 class Event(BaseModel):
     event_type: str
-    event_time: datetime | str
+    event_time: Union[datetime, str]
     meta: EventMeta
 
     @validator("event_type")
@@ -97,11 +97,11 @@ class Event(BaseModel):
 class EventMeta(BaseModel):
     attribute: str
     value: str
-    device_id: str | None
+    device_id: Optional[str]
     device_model: str
     device_name: str
     device_manufacturer: str
-    media: str | None
+    media: Optional[str]
 
     @validator("attribute", pre=True)
     def attribute_must_be(cls, v: str) -> str:
@@ -123,7 +123,7 @@ class EventMeta(BaseModel):
         return v
 
     @validator("value")
-    def value_must_be(cls, v: str, values: dict[str, str]) -> str | None:
+    def value_must_be(cls, v: str, values: dict[str, str]) -> Optional[str]:
         try:
             attribute = values["attribute"]
         except KeyError:
@@ -148,7 +148,7 @@ class EventMeta(BaseModel):
         return None
 
     @validator("media")
-    def media_cannot_exist_if(cls, v: str, values: dict[str, str]) -> str | None:
+    def media_cannot_exist_if(cls, v: str, values: dict[str, str]) -> Optional[str]:
         attribute = values["attribute"] or None
         if attribute != "camera" and (v != "" or v is not None):
             raise ValueError("cannot be used when attribute is not 'camera'")
@@ -176,7 +176,7 @@ class Alarm:
         sandbox: bool,
         owner_id: str,
         token: str,
-        prod_url: str | None,
+        prod_url: Optional[str],
     ) -> None:
         self.id = alarm_id
         self.sandbox = sandbox
@@ -188,7 +188,7 @@ class Alarm:
 
             self.prod_url = f"https://{parsed_url.netloc}/dispatch/v1/alarms"
 
-    async def cancel(self, pin: str | None) -> None:
+    async def cancel(self, pin: Optional[str]) -> None:
         if not self.active:
             return  # Already canceled :)
 
@@ -321,7 +321,7 @@ async def create_alarm(
     data: AlarmData,
     server_token: str,
     sandbox: bool = True,
-    prod_url: str | None = None,
+    prod_url: Optional[str] = None,
 ) -> Alarm:
     if sandbox or not prod_url:
         url = SANDBOX_URL.format(path="")
