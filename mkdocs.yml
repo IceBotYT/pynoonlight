@@ -13,6 +13,9 @@ theme:
         icon: material/toggle-switch
         name: Switch to light mode
 
+watch:
+  - src/pynoonlight
+
 nav:
   - Introduction: 'index.md'
   - api_docs.md
@@ -28,8 +31,7 @@ plugins:
       default_handler: python
       handlers:
         python:
-          rendering:
-            show_signature_annotations: true
-            show_source: true
-      watch:
-        - src/pynoonlight
+          paths: [src]
+          options:
+            docstring_style: sphinx
+            merge_init_into_class: true
