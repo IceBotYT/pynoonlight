@@ -29,14 +29,33 @@ async def _send_request(
 
 
 class FailedRequestError(Exception):
-    """Exception for when we fail to reach Noonlight."""
+    """
+    Exception for when a request does not return the expected status code.
+    """
 
 
 class InvalidURLError(Exception):
-    """Exception for when an invalid URL is received."""
+    """
+    Exception for when an invalid URL is received.
+    """
 
 
 class Address(BaseModel):
+    """
+    Used for static alarms (e.g. a fire or a security alarm).
+
+    :param line1: Line 1 of the address
+    :type line1: str
+    :param line2: Line 2 of the address
+    :type line2: str, optional
+    :param city: The city where the alarm occured
+    :type city: str
+    :param state: The state where the alarm occured
+    :type state: str
+    :param zip: The ZIP code where the alarm occured
+    :type zip: str
+    """
+
     line1: str
     line2: Optional[str]
     city: str
@@ -45,16 +64,47 @@ class Address(BaseModel):
 
 
 class Coordinates(BaseModel):
+    """
+    Used for dynamic alarms when the user is constantly changing location.
+
+    :param lat: Latitude of the alarm
+    :type lat: float
+    :param lon: Longitude of the alarm
+    :type lon: float
+    :param accuracy: Accuracy of the GPS in meters
+    :type accuracy: int
+    """
+
     lat: float
     lng: float
     accuracy: int
 
 
 class Workflow(BaseModel):
+    """
+    From Noonlight: Optional workflow ID. This will be provided to you by the Noonlight team for certain use cases.
+
+    :param id: The workflow ID provided to you by the Noonlight team.
+    :type id: str
+    """
+
     id: str
 
 
 class Services(BaseModel):
+    """
+    Requested services for an alarm.
+
+    :param police: Police requested
+    :type police: bool
+    :param fire: Fire department requested
+    :type fire: bool
+    :param medical: Medical personnel requested
+    :type medical: bool
+    :param other: Other authorities requested
+    :type other: bool
+    """
+
     police: bool
     fire: bool
     medical: bool
@@ -62,10 +112,38 @@ class Services(BaseModel):
 
 
 class Instructions(BaseModel):
+    """
+    From Noonlight: Instructions relayed to the dispatchers. Currently, the only allowed type is entry.
+
+    :param entry: Instructions on how to enter the area of the alarm.
+    :type entry: str
+    """
+
     entry: str
 
 
 class AlarmData(BaseModel):
+    """
+    Alarm data passed on to Noonlight dispatchers.
+
+    :param name: Name of the alarm owner.
+    :type name: str
+    :param phone: Verified phone number of the alarm owner.
+    :type phone: str
+    :param pin: PIN used to cancel the alarm.
+    :type pin: str, optional
+    :param owner_id: Owner ID of the alarm, generated automatically if missing.
+    :type owner_id: str, optional
+    :param location: Location of the alarm. This matters the most!
+    :type location: :class:`Address` or :class:`Coordinates`
+    :param workflow: See Workflow.
+    :type workflow: :class:`Workflow`
+    :param services: See Services.
+    :type services: :class:`Services`
+    :param instructions: See Instructions.
+    :type instructions: :class:`Instructions`
+    """
+
     name: str
     phone: str
     pin: Optional[str]
@@ -77,6 +155,18 @@ class AlarmData(BaseModel):
 
 
 class Event(BaseModel):
+    """
+    An event that occurs during an alarm.
+    This could be a smoke detector being cleared, a door being opened, a water leak being detected..
+
+    :param event_type: Must be one of 'alarm.device.activated_alarm', 'alarm.person.activated_alarm', 'alarm.device.value_changed'
+    :type event_type: str
+    :param event_time: The time the event occured. (if the datetime object is naive, it will be treated as if it is in local time zone)
+    :type event_time: datetime
+    :param meta: The metadata of the event (see EventMeta)
+    :type meta: :class:`EventMeta`
+    """
+
     event_type: str
     event_time: Union[datetime, str]
     meta: EventMeta
@@ -95,6 +185,11 @@ class Event(BaseModel):
 
 
 class EventMeta(BaseModel):
+    """
+    Metadata of an event to be used in Event.
+    See [here](https://docs.noonlight.com/reference/post_alarms-alarm-id-events-1).
+    """
+
     attribute: str
     value: str
     device_id: Optional[str]
@@ -156,6 +251,17 @@ class EventMeta(BaseModel):
 
 
 class Person(BaseModel):
+    """
+    A person that is added to the alarm.
+
+    :param name: The name of the person.
+    :type name: str
+    :param pin: Their PIN to cancel the alarm.
+    :type pin: str
+    :param phone: The phone number of the person.
+    :type phone: str
+    """
+
     name: str
     pin: str
     phone: str
@@ -189,6 +295,13 @@ class Alarm:
             self.prod_url = f"https://{parsed_url.netloc}/dispatch/v1/alarms"
 
     async def cancel(self, pin: Optional[str]) -> None:
+        """
+        Cancel an alarm.
+
+        :param pin: The PIN to cancel the alarm.
+        :type pin: Optional[str]
+        :raises FailedRequestError: Raised when the request to cancel the alarm has failed.
+        """
         if not self.active:
             return  # Already canceled :)
 
@@ -218,6 +331,13 @@ class Alarm:
         return
 
     async def update_location(self, coordinates: Coordinates) -> None:
+        """
+        Update the location of the alarm.
+
+        :param coordinates: The new coordinates of the alarm
+        :type coordinates: Coordinates
+        :raises FailedRequestError: Raised when the request to update the location fails
+        """
         url = (
             SANDBOX_URL.format(path=f"/{self.id}/locations")
             if self.sandbox
@@ -237,6 +357,13 @@ class Alarm:
         return
 
     async def create_events(self, events: list[Event]) -> None:
+        """
+        Create new events that started the alarm or occured during the alarm.
+
+        :param events: See Event.
+        :type events: list[Event]
+        :raises FailedRequestError: Raised when the request to create the events fails.
+        """
         event_dicts: list[dict[str, Any]] = []
         for _, event in enumerate(events):
             if isinstance(event.event_time, datetime) and (
@@ -275,6 +402,13 @@ class Alarm:
         return
 
     async def create_people(self, people: list[Person]) -> None:
+        """
+        Add new people to the alarm.
+
+        :param people: A list of :class:`Person`s to add
+        :type people: list[Person]
+        :raises FailedRequestError: Raised when the request to create the people fails.
+        """
         people_dicts = []
         for _, person in enumerate(people):
             people_dicts.append(person.dict())
@@ -298,6 +432,13 @@ class Alarm:
         return
 
     async def update_person(self, person_data: dict[str, Any]) -> None:
+        """
+        Update the alarm owner. You may only update the alarm owner right now.
+
+        :param person_data: See [here](https://docs.noonlight.com/reference/put_alarms-alarm-id-people-person-id)
+        :type person_data: dict[str, Any]
+        :raises FailedRequestError: Raised when the request to update the alarm owner fails.
+        """
         url = (
             SANDBOX_URL.format(path=f"/{self.id}/people")
             if self.sandbox
@@ -323,6 +464,22 @@ async def create_alarm(
     sandbox: bool = True,
     prod_url: Optional[str] = None,
 ) -> Alarm:
+    """
+    Create a new alarm.
+
+    :param data: Data for the alarm. See AlarmData.
+    :type data: AlarmData
+    :param server_token: Your server token. Make sure it matches the sandbox or production token you have!
+    :type server_token: str
+    :param sandbox: Set to False if this is a real alarm, defaults to True
+    :type sandbox: bool, optional
+    :param prod_url: The URL of the production environment (must have https:// and must end in noonlight.com), defaults to None
+    :type prod_url: Optional[str], optional
+    :raises InvalidURLError: Raised when the production URL provided is invalid.
+    :raises FailedRequestError: Raised when the request to create the alarm fails
+    :return: The alarm
+    :rtype: Alarm
+    """
     if sandbox or not prod_url:
         url = SANDBOX_URL.format(path="")
     else:
