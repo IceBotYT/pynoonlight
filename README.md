@@ -1,5 +1,6 @@
 # pynoonlight
 
+[![Test](https://github.com/IceBotYT/pynoonlight/actions/workflows/test.yml/badge.svg)](https://github.com/IceBotYT/pynoonlight/actions/workflows/test.yml)
 [![PyPI](https://img.shields.io/pypi/v/pynoonlight?style=flat-square)](https://pypi.python.org/pypi/pynoonlight/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynoonlight?style=flat-square)](https://pypi.python.org/pypi/pynoonlight/)
 [![PyPI - License](https://img.shields.io/pypi/l/pynoonlight?style=flat-square)](https://pypi.python.org/pypi/pynoonlight/)
