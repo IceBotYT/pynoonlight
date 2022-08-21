@@ -461,7 +461,6 @@ async def create_alarm(
 
     Raises:
         InvalidURLError: Raised when the production URL provided is invalid.
-        InvalidURLError: DELETE ME
         FailedRequestError: Raised when the request to create the alarm fails
 
     Returns:
