@@ -42,7 +42,7 @@ class Address(BaseModel):
 
     Args:
         line1 (str): Line 1 of the address
-        line2 (:obj:`str`, optional): Line 2 of the address
+        line2 (str, optional): Line 2 of the address. Optional.
         city (str): The city where the alarm occured
         state (str): The state where the alarm occured
         zip (str): The ZIP code where the alarm occured
@@ -115,12 +115,12 @@ class AlarmData(BaseModel):
     Args:
         name (str): Name of the alarm owner.
         phone (str): Verified phone number of the alarm owner.
-        pin (:obj:`str`, optional): PIN used to cancel the alarm.
-        owner_id (:obj:`str`, optional): Owner ID of the alarm, generated automatically if missing.
-        location (:obj:`Location`): Location of the alarm. This matters the most!
-        workflow (:obj:`Workflow`): See Workflow.
-        services (:obj:`Services`): See Services.
-        instructions (:obj:`Services`): See Instructions.
+        pin (str, optional): PIN used to cancel the alarm. Optional.
+        owner_id (str, optional): Owner ID of the alarm, generated automatically if missing. Optional.
+        location (Location): Location of the alarm. This matters the most!
+        workflow (Workflow, optional): See Workflow. Optional.
+        services (Services, optional): See Services. Optional.
+        instructions (Instructions, optional): See Instructions. Optional.
     """
 
     name: str
@@ -141,7 +141,7 @@ class Event(BaseModel):
     Args:
         event_type (str): Must be one of 'alarm.device.activated_alarm', 'alarm.person.activated_alarm', 'alarm.device.value_changed'
         event_time (datetime): The time the event occured. (if the datetime object is naive, it will be treated as if it is in local time zone)
-        meta (:obj:`EventMeta`): The metadata of the event (see EventMeta)
+        meta (EventMeta): The metadata of the event (see EventMeta)
     """
 
     event_type: str
@@ -243,6 +243,13 @@ class Person(BaseModel):
 
 
 class Alarm:
+    """
+    Class for Alarms.
+
+    Danger:
+        **DO NOT INSTANTIATE THIS CLASS TO CREATE AN ALARM. USE `create_alarm()` INSTEAD.**
+    """
+
     id: str
     sandbox: bool
     active: bool = True
@@ -273,7 +280,7 @@ class Alarm:
         """Cancel an alarm.
 
         Args:
-            pin (:obj:`str`, optional): PIN used to cancel the alarm.
+            pin (str, optional): PIN used to cancel the alarm. Optional.
 
         Raises:
             FailedRequestError: Raised when the request to cancel the alarm fails.
@@ -310,7 +317,7 @@ class Alarm:
         """Update the location of the alarm.
 
         Args:
-            coordinates (:obj:`Coordinates`): The new coordinates of the alarm.
+            coordinates (Coordinates): The new coordinates of the alarm.
 
         Raises:
             FailedRequestError: Raised when the request to update the coordinates fails.
@@ -449,8 +456,8 @@ async def create_alarm(
     Args:
         data (AlarmData): Data for the alarm. See AlarmData.
         server_token (str): Your server token. Make sure it matches the sandbox or production token you have!
-        sandbox (:obj:`bool`, optional): Set to False if this is a real alarm. Defaults to True.
-        prod_url (:obj:`str`, optional): The URL of the production environment (must have https:// and must end in noonlight.com). Defaults to None.
+        sandbox (bool, optional): Set to False if this is a real alarm. Defaults to True.
+        prod_url (str, optional): The URL of the production environment (must have https:// and must end in noonlight.com). Optional.
 
     Raises:
         InvalidURLError: Raised when the production URL provided is invalid.
