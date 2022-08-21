@@ -420,9 +420,9 @@ class Alarm:
             FailedRequestError: Raised when the request to update the alarm owner fails.
         """
         url = (
-            SANDBOX_URL.format(path=f"/{self.id}/people")
+            SANDBOX_URL.format(path=f"/{self.id}/people/{self.owner_id}")
             if self.sandbox
-            else self.prod_url + f"/{self.id}/people"
+            else self.prod_url + f"/{self.id}/people/{self.owner_id}"
         )
 
         headers = {
