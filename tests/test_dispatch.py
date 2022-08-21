@@ -319,7 +319,7 @@ class TestDispatch:
 
     async def test__update_people(self) -> None:
         a: Alarm = await mock_alarm()
-        url = SANDBOX_URL.format(path="/test_alarm_id/people")
+        url = SANDBOX_URL.format(path="/test_alarm_id/people/test_owner_id")
         with requests_mock.Mocker() as m:
             m.put(url, status_code=200)
             await a.update_person({"height": {"unit": "INCHES", "value": "100"}})
