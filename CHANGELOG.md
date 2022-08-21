@@ -17,5 +17,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Convert to Google docstrings
 - Add `dependabot` version updates
 - Optimize `test` workflow
+- Move prod URL validation and request sending to `__init__.py`
 
 [Unreleased]: https://github.com/IceBotYT/pynoonlight/compare/v0.1.0..HEAD

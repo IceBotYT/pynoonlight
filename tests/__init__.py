@@ -3,13 +3,13 @@ from __future__ import annotations
 import requests_mock
 from tenacity import wait_none
 
+from pynoonlight import _send_request
 from pynoonlight.dispatch import (
     SANDBOX_URL,
     Address,
     Alarm,
     AlarmData,
     Coordinates,
-    _send_request,
     create_alarm,
 )
 

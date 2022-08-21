@@ -5,37 +5,15 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from typing import Any, Optional, Union
-from urllib.parse import urlparse
 
-import requests
 from pydantic import BaseModel, validator
-from tenacity import RetryError, retry, stop_after_attempt, wait_exponential
+from tenacity import RetryError
 from tzlocal import get_localzone_name
+
+from . import FailedRequestError, _parse_prod_url, _send_request
 
 SANDBOX_URL = "https://api-sandbox.noonlight.com/dispatch/v1/alarms{path}"
 _LOGGER = logging.getLogger(__name__)
-
-
-@retry(stop=stop_after_attempt(5), wait=wait_exponential(max=10))
-async def _send_request(
-    method: str,
-    url: str,
-    headers: dict[str, str],
-    payload: Union[dict[Any, Any], list[dict[Any, Any]]],
-    expected_code: int,
-) -> requests.Response:
-    response = requests.request(method, url, headers=headers, json=payload)
-    if response.status_code != expected_code:
-        raise FailedRequestError(response.text)
-    return response
-
-
-class FailedRequestError(Exception):
-    """Exception for when a request does not return the expected status code."""
-
-
-class InvalidURLError(Exception):
-    """Exception for when an invalid URL is received."""
 
 
 class Address(BaseModel):
@@ -274,9 +252,7 @@ class Alarm:
         self._token = token
 
         if prod_url:
-            parsed_url = urlparse(prod_url)
-
-            self.prod_url = f"https://{parsed_url.netloc}/dispatch/v1/alarms"
+            self.prod_url = prod_url
 
     async def cancel(self, pin: Optional[str]) -> None:
         """Cancel an alarm.
@@ -471,15 +447,7 @@ async def create_alarm(
     if sandbox or not prod_url:
         url = SANDBOX_URL.format(path="")
     else:
-        # Validate the prod URL
-        parsed_url = urlparse(prod_url)
-
-        if parsed_url.scheme != "https":
-            raise InvalidURLError("Invalid or missing URL scheme (expected https)")
-
-        if not parsed_url.netloc.endswith(".noonlight.com"):
-            raise InvalidURLError("Invalid domain (expected ending with noonlight.com)")
-        url = f"https://{parsed_url.netloc}/dispatch/v1/alarms"
+        url = _parse_prod_url(prod_url)
 
     headers = {
         "Accept": "application/json",
@@ -500,7 +468,7 @@ async def create_alarm(
         sandbox=sandbox,
         owner_id=response_data["owner_id"],
         token=server_token,
-        prod_url=prod_url,
+        prod_url=url,
     )
 
     return alarm

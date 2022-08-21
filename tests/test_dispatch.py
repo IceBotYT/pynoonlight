@@ -7,6 +7,7 @@ import requests_mock
 from pydantic import ValidationError
 from tzlocal import get_localzone
 
+from pynoonlight import FailedRequestError, InvalidURLError
 from pynoonlight.dispatch import (
     SANDBOX_URL,
     Alarm,
@@ -14,8 +15,6 @@ from pynoonlight.dispatch import (
     Coordinates,
     Event,
     EventMeta,
-    FailedRequestError,
-    InvalidURLError,
     Person,
     create_alarm,
 )
