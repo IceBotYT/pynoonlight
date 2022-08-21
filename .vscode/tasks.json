@@ -13,6 +13,19 @@
                 "kind": "test",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Serve mkdocs",
+            "type": "shell",
+            "command": "poetry run mkdocs serve -v",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
         }
     ]
 }
