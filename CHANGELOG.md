@@ -16,5 +16,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fix `mkdocs` by adding `show_submodules: true`
 - Convert to Google docstrings
 - Add `dependabot` version updates
+- Optimize `test` workflow
 
 [Unreleased]: https://github.com/IceBotYT/pynoonlight/compare/v0.1.0..HEAD
