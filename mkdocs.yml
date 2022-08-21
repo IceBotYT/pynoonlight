@@ -1,5 +1,6 @@
 site_name: pynoonlight
 repo_url: https://github.com/IceBotYT/pynoonlight
+repo_name: IceBotYT/pynoonlight
 
 theme:
   name: material
@@ -35,3 +36,4 @@ plugins:
           options:
             docstring_style: sphinx
             merge_init_into_class: true
+            show_submodules: true
