@@ -118,6 +118,14 @@ class VerificationData(BaseModel):
     webhook_url: Optional[str]
 
 
+class TaskResponse(BaseModel):
+    id: str
+    prompt: str
+    expiration: dict[str, int]
+    attachments: Union[list[dict[str, Union[str, dict[str, float]]]], dict[str, str]]
+    webhook_url: str
+
+
 async def create_task(
     data: VerificationData,
     server_token: str,
@@ -160,7 +168,5 @@ async def create_task(
     except RetryError as e:
         raise FailedRequestError from e
 
-    # TODO: Make pydantic model for this
-    response_data = response.json()
-    task_id: str = response_data["id"]
-    return task_id
+    response_data = TaskResponse(**response.json())
+    return response_data.id

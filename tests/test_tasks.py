@@ -66,7 +66,17 @@ class TestTasks:
 
     async def test__create_task_sandbox(self) -> None:
         with requests_mock.Mocker() as m:
-            m.post(SANDBOX_URL, json={"id": "test_task_id"}, status_code=201)
+            m.post(
+                SANDBOX_URL,
+                json={
+                    "id": "test_task_id",
+                    "prompt": "test_prompt",
+                    "expiration": {"timeout": "30"},
+                    "attachments": {"url": "https://example.com/video.mp4"},
+                    "webhook_url": "https://example.com/webhook",
+                },
+                status_code=201,
+            )
             await create_task(
                 VerificationData(
                     prompt="Is this a person?",
@@ -83,7 +93,13 @@ class TestTasks:
         with requests_mock.Mocker() as m:
             m.post(
                 "https://some-api.noonlight.com/tasks/v1/verifications",
-                json={"id": "test_task_id"},
+                json={
+                    "id": "test_task_id",
+                    "prompt": "test_prompt",
+                    "expiration": {"timeout": "30"},
+                    "attachments": {"url": "https://example.com/video.mp4"},
+                    "webhook_url": "https://example.com/webhook",
+                },
                 status_code=201,
             )
             await create_task(
