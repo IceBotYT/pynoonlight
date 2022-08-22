@@ -20,5 +20,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Move prod URL validation and request sending to `__init__.py`
 - Implement tasks API
 - Add tests for tasks API
+- Make setting up virtual environments easier
 
 [Unreleased]: https://github.com/IceBotYT/pynoonlight/compare/v0.1.0..HEAD

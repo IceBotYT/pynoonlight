@@ -4,10 +4,20 @@
         {
             "label": "Run Tests",
             "type": "shell",
-            "command": "poetry run pytest tests --cov pynoonlight --cov-report term-missing --durations-min=1 --durations=0",
+            "command": "'${command:python.interpreterPath}' ''.$(echo \"${command:python.interpreterPath}\" | grep -Eo \"\\/\\..+-venv\")/bin/pytest''",
+            "args": [
+                "tests",
+                "--cov",
+                "pynoonlight",
+                "--cov-report",
+                "term-missing",
+                "--durations-min=1",
+                "--durations=0"
+            ],
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "new",
+                "focus": true
             },
             "group": {
                 "kind": "test",
@@ -17,13 +27,18 @@
         {
             "label": "Serve mkdocs",
             "type": "shell",
-            "command": "poetry run mkdocs serve -v",
+            "command": "'${command:python.interpreterPath}' ''.$(echo \"${command:python.interpreterPath}\" | grep -Eo \"\\/\\..+-venv\")/bin/mkdocs''",
+            "args": [
+                "serve",
+                "-v"
+            ],
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "new",
+                "focus": true
             },
             "group": {
-                "kind": "test",
+                "kind": "build",
                 "isDefault": true
             }
         }
