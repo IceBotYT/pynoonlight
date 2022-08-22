@@ -37,6 +37,7 @@ pydantic = "^1.9.2"
 tzlocal = "^4.2"
 pychalk = "2.0.1"
 mkdocstrings-python = "^0.7.1"
+validators = "^0.20.0"
 
 [tool.poetry.dev-dependencies]
 autoflake = "*"
@@ -91,7 +92,6 @@ addopts = """\
 """
 
 [tool.coverage.report]
-fail_under = 100
 exclude_lines = [
     'if TYPE_CHECKING:',
     'pragma: no cover'

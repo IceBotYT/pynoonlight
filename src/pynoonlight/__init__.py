@@ -39,3 +39,16 @@ def _parse_prod_url(url: str) -> str:
     url = f"https://{parsed_url.netloc}/dispatch/v1/alarms"
 
     return url
+
+
+def _parse_tasks_prod_url(url: str) -> str:
+    parsed_url = urlparse(url)
+
+    if parsed_url.scheme != "https":
+        raise InvalidURLError("Invalid or missing URL scheme (expected https)")
+
+    if not parsed_url.netloc.endswith(".noonlight.com"):
+        raise InvalidURLError("Invalid domain (expected ending with noonlight.com)")
+    url = f"https://{parsed_url.netloc}/tasks/v1/verifications"
+
+    return url
