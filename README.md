@@ -36,10 +36,10 @@ pip install pynoonlight
 
 * Setup virtual environments
 
-This will modify your `.bashrc` file to create two new aliases to point to the virtual environments.
-The two new aliases are:
-- noonlight_python3.10
-- noonlight_python3.7
+> This will modify your `.bashrc` file to create two new aliases to point to the virtual environments.
+> The two new aliases are:
+> - noonlight_python3.10
+> - noonlight_python3.7
 
 ```sh
 cd pynoonlight
