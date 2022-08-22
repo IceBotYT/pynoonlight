@@ -75,7 +75,7 @@ jobs:
       - changes
       - lint-cruft
       - pre-commit
-    if: ${{ needs.changes.outputs.run_tests == 'true' }}
+    if: ${{ always() && needs.changes.outputs.run_tests == 'true' }}
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/python-poetry-env
