@@ -35,7 +35,7 @@ else:
         method: str,
         url: str,
         headers: dict,
-        payload: Union[dict[Any, Any], list[dict[Any, Any]]],
+        payload: Union[dict, list[dict]],
         expected_code: int,
     ) -> requests.Response:
         response = requests.request(method, url, headers=headers, json=payload)
