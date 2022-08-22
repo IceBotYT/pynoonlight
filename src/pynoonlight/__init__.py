@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Union
+from typing import Any, Union
 from urllib.parse import urlparse
 
 import requests
@@ -13,35 +13,18 @@ class InvalidURLError(Exception):
     """Exception for when an invalid URL is received."""
 
 
-if TYPE_CHECKING:
-
-    @retry(stop=stop_after_attempt(5), wait=wait_exponential(max=10))
-    async def _send_request(
-        method: str,
-        url: str,
-        headers: dict[str, str],
-        payload: Union[dict[Any, Any], list[dict[Any, Any]]],
-        expected_code: int,
-    ) -> requests.Response:
-        response = requests.request(method, url, headers=headers, json=payload)
-        if response.status_code != expected_code:
-            raise FailedRequestError(response.text)
-        return response
-
-else:
-
-    @retry(stop=stop_after_attempt(5), wait=wait_exponential(max=10))
-    async def _send_request(
-        method: str,
-        url: str,
-        headers: dict,
-        payload,
-        expected_code: int,
-    ) -> requests.Response:
-        response = requests.request(method, url, headers=headers, json=payload)
-        if response.status_code != expected_code:
-            raise FailedRequestError(response.text)
-        return response
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(max=10))
+async def _send_request(
+    method: str,
+    url: str,
+    headers: dict[str, str],
+    payload: Union[dict[Any, Any], list[dict[Any, Any]]],
+    expected_code: int,
+) -> requests.Response:
+    response = requests.request(method, url, headers=headers, json=payload)
+    if response.status_code != expected_code:
+        raise FailedRequestError(response.text)
+    return response
 
 
 def _parse_prod_url(url: str) -> str:
