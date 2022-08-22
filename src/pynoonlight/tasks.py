@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Dict, List, Optional, Union
 
 import validators  # type: ignore # does not have types
 from pydantic import BaseModel, root_validator, validator
@@ -49,7 +49,7 @@ class Image(BaseModel):
 
     url: str
     media_type: str
-    points_of_interest: list[PointOfInterest]
+    points_of_interest: List[PointOfInterest]
 
     @validator("url")
     def url_valid(cls, v: str) -> str:
@@ -104,7 +104,7 @@ class VerificationData(BaseModel):
         device_id (str, optional): The device ID of the camera or device.
         prompt (str): The text displayed to the verifier. They will select `yes` or `no` in response to this prompt.
         expiration (int): The amount of time, in seconds, allotted to complete the verification task.
-        attachments (`list[Image]` or `Video`): The attachment shown to the verifier.
+        attachments (Union[list[Image], Video]): The attachment shown to the verifier.
         webhook_url (str, optional): The webhook that will be invoked when the verification is complete. If none is provided, it will use the preconfigured webhook.
     """
 
@@ -114,15 +114,15 @@ class VerificationData(BaseModel):
     device_id: Optional[str]
     prompt: str
     expiration: int
-    attachments: Union[list[Image], Video]
+    attachments: Union[List[Image], Video]
     webhook_url: Optional[str]
 
 
 class TaskResponse(BaseModel):
     id: str
     prompt: str
-    expiration: dict[str, int]
-    attachments: Union[list[dict[str, Union[str, dict[str, float]]]], dict[str, str]]
+    expiration: Dict[str, int]
+    attachments: Union[List[Dict[str, Union[str, Dict[str, float]]]], Dict[str, str]]
     webhook_url: str
 
 
