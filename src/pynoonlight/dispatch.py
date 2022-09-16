@@ -130,15 +130,16 @@ class Event(BaseModel):
 
     @validator("event_type")
     def event_type_must_be(cls, v: str) -> str:
-        if v not in [
+        if v in {
             "alarm.device.activated_alarm",
             "alarm.person.activated_alarm",
             "alarm.device.value_changed",
-        ]:
+        }:
+            return v
+        else:
             raise ValueError(
                 "must be one of 'alarm.device.activated_alarm', 'alarm.person.activated_alarm', 'alarm.device.value_changed'"
             )
-        return v
 
 
 class EventMeta(BaseModel):
@@ -180,17 +181,17 @@ class EventMeta(BaseModel):
             attribute = values["attribute"]
         except KeyError:
             attribute = None
-        value_should_be = {
-            "smoke": ["detected", "clear"],
-            "camera": ["unknown"],
-            "lock": ["locked", "unlocked", "door_open", "door_closed"],
-            "contact": ["open", "closed"],
-            "motion": ["detected", "cleared"],
-            "water_leak": ["detected", "cleared"],
-            "freeze": ["detected", "cleared"],
-            "network_connection": ["lost", "established"],
-        }
         if attribute is not None:
+            value_should_be = {
+                "smoke": ["detected", "clear"],
+                "camera": ["unknown"],
+                "lock": ["locked", "unlocked", "door_open", "door_closed"],
+                "contact": ["open", "closed"],
+                "motion": ["detected", "cleared"],
+                "water_leak": ["detected", "cleared"],
+                "freeze": ["detected", "cleared"],
+                "network_connection": ["lost", "established"],
+            }
             if v not in value_should_be[attribute]:
                 raise ValueError(
                     f"must be one of {','.join(value_should_be[attribute])}"
@@ -202,9 +203,10 @@ class EventMeta(BaseModel):
     @validator("media")
     def media_cannot_exist_if(cls, v: str, values: dict[str, str]) -> Optional[str]:
         attribute = values["attribute"] or None
-        if attribute != "camera" and (v != "" or v is not None):
+        if attribute == "camera" or not v and v is None:
+            return v
+        else:
             raise ValueError("cannot be used when attribute is not 'camera'")
-        return v
 
 
 class Person(BaseModel):
@@ -269,8 +271,9 @@ class Alarm:
         url = (
             SANDBOX_URL.format(path=f"/{self.id}/status")
             if self.sandbox
-            else self.prod_url + f"/{self.id}/status"
+            else f"{self.prod_url}/{self.id}/status"
         )
+
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -303,8 +306,9 @@ class Alarm:
         url = (
             SANDBOX_URL.format(path=f"/{self.id}/locations")
             if self.sandbox
-            else self.prod_url + f"/{self.id}/locations"
+            else f"{self.prod_url}/{self.id}/locations"
         )
+
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self._token}",
@@ -337,9 +341,7 @@ class Alarm:
                     "Event time does not include time zone information, treating as if it is local time zone."
                 )
                 tz = get_localzone_name()
-                event.event_time = event.event_time.strftime(
-                    "%m/%d/%Y, %-I:%M:%S %p " + tz
-                )
+                event.event_time = event.event_time.strftime(f"%m/%d/%Y, %-I:%M:%S %p {tz}")
             elif isinstance(event.event_time, datetime):
                 event.event_time = event.event_time.strftime(
                     "%m/%d/%Y, %-I:%M:%S %p %Z"
@@ -349,8 +351,9 @@ class Alarm:
         url = (
             SANDBOX_URL.format(path=f"/{self.id}/events")
             if self.sandbox
-            else self.prod_url + f"/{self.id}/events"
+            else f"{self.prod_url}/{self.id}/events"
         )
+
 
         headers = {
             "Content-Type": "application/json",
@@ -373,15 +376,13 @@ class Alarm:
         Raises:
             FailedRequestError: Raised when the request to add the people failed.
         """
-        people_dicts = []
-        for _, person in enumerate(people):
-            people_dicts.append(person.dict())
-
+        people_dicts = [person.dict() for person in people]
         url = (
             SANDBOX_URL.format(path=f"/{self.id}/people")
             if self.sandbox
-            else self.prod_url + f"/{self.id}/people"
+            else f"{self.prod_url}/{self.id}/people"
         )
+
 
         headers = {
             "Content-Type": "application/json",
@@ -407,8 +408,9 @@ class Alarm:
         url = (
             SANDBOX_URL.format(path=f"/{self.id}/people/{self.owner_id}")
             if self.sandbox
-            else self.prod_url + f"/{self.id}/people/{self.owner_id}"
+            else f"{self.prod_url}/{self.id}/people/{self.owner_id}"
         )
+
 
         headers = {
             "Content-Type": "application/json",
@@ -463,12 +465,10 @@ async def create_alarm(
         raise FailedRequestError from e
 
     response_data = response.json()
-    alarm = Alarm(
+    return Alarm(
         alarm_id=response_data["id"],
         sandbox=sandbox,
         owner_id=response_data["owner_id"],
         token=server_token,
         prod_url=url,
     )
-
-    return alarm

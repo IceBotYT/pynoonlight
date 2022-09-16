@@ -33,7 +33,7 @@ class PointOfInterest(BaseModel):
 
     @root_validator()
     def verify_values(cls, values: dict[str, int]) -> dict[str, int]:
-        if not all(elem >= 0 for elem in values.values()):
+        if any(elem < 0 for elem in values.values()):
             raise ValueError("all dictionary values must be non-negative")
         return values
 
@@ -62,9 +62,10 @@ class Image(BaseModel):
 
     @validator("media_type")
     def media_type_valid(cls, v: str) -> str:
-        if v not in ["image/jpeg", "image/png", "image/jpg"]:
+        if v in {"image/jpeg", "image/png", "image/jpg"}:
+            return v
+        else:
             raise ValueError("must be one of 'image/jpeg', 'image/png', 'image/jpg'")
-        return v
 
 
 class Video(BaseModel):
@@ -89,9 +90,10 @@ class Video(BaseModel):
 
     @validator("media_type")
     def media_type_valid(cls, v: str) -> str:
-        if v not in ["video/mp4", "application/x-mpegURL"]:
+        if v in {"video/mp4", "application/x-mpegURL"}:
+            return v
+        else:
             raise ValueError("must be one of 'video/mp4', 'application/x-mpegURL'")
-        return v
 
 
 class VerificationData(BaseModel):

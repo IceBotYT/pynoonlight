@@ -38,9 +38,7 @@ def _parse_prod_url(url: str) -> str:
 
     if not parsed_url.netloc.endswith(".noonlight.com"):
         raise InvalidURLError("Invalid domain (expected ending with noonlight.com)")
-    url = f"https://{parsed_url.netloc}/dispatch/v1/alarms"
-
-    return url
+    return f"https://{parsed_url.netloc}/dispatch/v1/alarms"
 
 
 def _parse_tasks_prod_url(url: str) -> str:
@@ -51,6 +49,4 @@ def _parse_tasks_prod_url(url: str) -> str:
 
     if not parsed_url.netloc.endswith(".noonlight.com"):
         raise InvalidURLError("Invalid domain (expected ending with noonlight.com)")
-    url = f"https://{parsed_url.netloc}/tasks/v1/verifications"
-
-    return url
+    return f"https://{parsed_url.netloc}/tasks/v1/verifications"
