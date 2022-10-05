@@ -6,6 +6,7 @@ import logging
 from datetime import datetime
 from typing import Any, Optional, Union
 
+import aiohttp
 from pydantic import BaseModel, validator
 from tenacity import RetryError
 from tzlocal import get_localzone_name
@@ -29,7 +30,7 @@ class Address(BaseModel):
     """
 
     line1: str
-    line2: Optional[str]
+    line2: Optional[str] = None
     city: str
     state: str
     zip: str
@@ -172,7 +173,6 @@ class EventMeta(BaseModel):
                 "must be one of 'smoke', 'camera', 'lock', 'contact', 'motion', 'network_connection', 'water_leak', 'freeze'"
             )
 
-        print("done")
         return v
 
     @validator("value")
@@ -239,6 +239,7 @@ class Alarm:
     owner_id: str
     prod_url: str
     _token: str
+    _session: Optional[aiohttp.ClientSession]
 
     def __init__(
         self,
@@ -247,11 +248,13 @@ class Alarm:
         owner_id: str,
         token: str,
         prod_url: Optional[str],
+        session: Optional[aiohttp.ClientSession] = None,
     ) -> None:
         self.id = alarm_id
         self.sandbox = sandbox
         self.owner_id = owner_id
         self._token = token
+        self._session = session
 
         if prod_url:
             self.prod_url = prod_url
@@ -286,7 +289,7 @@ class Alarm:
         )
 
         try:
-            await _send_request("POST", url, headers, payload, 201)
+            await _send_request("POST", url, headers, payload, 201, self._session)
         except RetryError as e:
             raise FailedRequestError from e
 
@@ -316,7 +319,7 @@ class Alarm:
         payload = coordinates.dict()
 
         try:
-            await _send_request("POST", url, headers, payload, 201)
+            await _send_request("POST", url, headers, payload, 201, self._session)
         except RetryError as e:
             raise FailedRequestError from e
 
@@ -341,7 +344,9 @@ class Alarm:
                     "Event time does not include time zone information, treating as if it is local time zone."
                 )
                 tz = get_localzone_name()
-                event.event_time = event.event_time.strftime(f"%m/%d/%Y, %-I:%M:%S %p {tz}")
+                event.event_time = event.event_time.strftime(
+                    f"%m/%d/%Y, %-I:%M:%S %p {tz}"
+                )
             elif isinstance(event.event_time, datetime):
                 event.event_time = event.event_time.strftime(
                     "%m/%d/%Y, %-I:%M:%S %p %Z"
@@ -354,14 +359,13 @@ class Alarm:
             else f"{self.prod_url}/{self.id}/events"
         )
 
-
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self._token}",
         }
 
         try:
-            await _send_request("POST", url, headers, event_dicts, 201)
+            await _send_request("POST", url, headers, event_dicts, 201, self._session)
         except RetryError as e:
             raise FailedRequestError from e
 
@@ -383,14 +387,13 @@ class Alarm:
             else f"{self.prod_url}/{self.id}/people"
         )
 
-
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self._token}",
         }
 
         try:
-            await _send_request("POST", url, headers, people_dicts, 201)
+            await _send_request("POST", url, headers, people_dicts, 201, self._session)
         except RetryError as e:
             raise FailedRequestError from e
 
@@ -411,14 +414,13 @@ class Alarm:
             else f"{self.prod_url}/{self.id}/people/{self.owner_id}"
         )
 
-
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self._token}",
         }
 
         try:
-            await _send_request("PUT", url, headers, person_data, 200)
+            await _send_request("PUT", url, headers, person_data, 200, self._session)
         except RetryError as e:
             raise FailedRequestError from e
 
@@ -430,6 +432,7 @@ async def create_alarm(
     server_token: str,
     sandbox: bool = True,
     prod_url: Optional[str] = None,
+    client_session: Optional[aiohttp.ClientSession] = None,
 ) -> Alarm:
     """Create a new alarm.
 
@@ -438,6 +441,7 @@ async def create_alarm(
         server_token (str): Your server token. Make sure it matches the sandbox or production token you have!
         sandbox (bool, optional): Set to False if this is a real alarm. Defaults to True.
         prod_url (str, optional): The URL of the production environment (must have https:// and must end in noonlight.com). Optional.
+        client_session (aiohttp.ClientSession, optional): The client session used for requests in aiohttp
 
     Raises:
         InvalidURLError: Raised when the production URL provided is invalid.
@@ -460,15 +464,20 @@ async def create_alarm(
     payload = data.dict()
 
     try:
-        response = await _send_request("POST", url, headers, payload, 201)
+        response = await _send_request(
+            "POST", url, headers, payload, 201, client_session
+        )
+        print("getting response data")
+        response_data = await response.json()
+        print("yay")
     except RetryError as e:
         raise FailedRequestError from e
 
-    response_data = response.json()
     return Alarm(
         alarm_id=response_data["id"],
         sandbox=sandbox,
         owner_id=response_data["owner_id"],
         token=server_token,
         prod_url=url,
+        session=client_session,
     )

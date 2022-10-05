@@ -170,5 +170,5 @@ async def create_task(
     except RetryError as e:
         raise FailedRequestError from e
 
-    response_data = TaskResponse(**response.json())
+    response_data = TaskResponse(**await response.json())
     return response_data.id

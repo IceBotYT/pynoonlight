@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import requests_mock
+from aioresponses import aioresponses
 from tenacity import wait_none
 
 from pynoonlight import _send_request
@@ -25,11 +25,11 @@ async def mock_alarm() -> Alarm:
             line1="1234 Street St", city="City", state="State", zip="12345"
         ),
     )
-    with requests_mock.Mocker() as m:
+    with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
         m.post(
             SANDBOX_URL.format(path=""),
-            status_code=201,
-            json={"id": "test_alarm_id", "owner_id": "test_owner_id"},
+            status=201,
+            payload={"id": "test_alarm_id", "owner_id": "test_owner_id"},
         )
         a: Alarm = await create_alarm(
             data=alarm_data,
@@ -46,11 +46,11 @@ async def mock_dynamic_alarm() -> Alarm:
         pin="1234",
         location=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2),
     )
-    with requests_mock.Mocker() as m:
+    with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
         m.post(
             SANDBOX_URL.format(path=""),
-            status_code=201,
-            json={"id": "test_alarm_id", "owner_id": "test_owner_id"},
+            status=201,
+            payload={"id": "test_alarm_id", "owner_id": "test_owner_id"},
         )
         a: Alarm = await create_alarm(
             data=alarm_data,
@@ -67,11 +67,11 @@ async def mock_prod_alarm() -> Alarm:
         pin="1234",
         location=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2),
     )
-    with requests_mock.Mocker() as m:
+    with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
         m.post(
             "https://api-test.noonlight.com/dispatch/v1/alarms",
-            status_code=201,
-            json={"id": "test_alarm_id", "owner_id": "test_owner_id"},
+            status=201,
+            payload={"id": "test_alarm_id", "owner_id": "test_owner_id"},
         )
         a: Alarm = await create_alarm(
             data=alarm_data,

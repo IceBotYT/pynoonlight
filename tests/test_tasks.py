@@ -1,5 +1,5 @@
 import pytest
-import requests_mock
+from aioresponses import aioresponses
 from pydantic import ValidationError
 
 from pynoonlight import FailedRequestError
@@ -65,17 +65,17 @@ class TestTasks:
             Video(url="https://example.com/video.mp4", media_type="application/json")
 
     async def test__create_task_sandbox(self) -> None:
-        with requests_mock.Mocker() as m:
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
             m.post(
                 SANDBOX_URL,
-                json={
+                payload={
                     "id": "test_task_id",
                     "prompt": "test_prompt",
                     "expiration": {"timeout": "30"},
                     "attachments": {"url": "https://example.com/video.mp4"},
                     "webhook_url": "https://example.com/webhook",
                 },
-                status_code=201,
+                status=201,
             )
             await create_task(
                 VerificationData(
@@ -90,17 +90,17 @@ class TestTasks:
             )
 
     async def test__create_task_prod(self) -> None:
-        with requests_mock.Mocker() as m:
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
             m.post(
                 "https://some-api.noonlight.com/tasks/v1/verifications",
-                json={
+                payload={
                     "id": "test_task_id",
                     "prompt": "test_prompt",
                     "expiration": {"timeout": "30"},
                     "attachments": {"url": "https://example.com/video.mp4"},
                     "webhook_url": "https://example.com/webhook",
                 },
-                status_code=201,
+                status=201,
             )
             await create_task(
                 VerificationData(
@@ -117,10 +117,10 @@ class TestTasks:
             )
 
     async def test__failed_request(self) -> None:
-        with requests_mock.Mocker() as m:
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
             m.post(
                 "https://some-api.noonlight.com/tasks/v1/verifications",
-                status_code=500,
+                status=500,
             )
             with pytest.raises(FailedRequestError):
                 await create_task(

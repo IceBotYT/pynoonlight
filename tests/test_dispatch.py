@@ -3,11 +3,13 @@ from __future__ import annotations
 from datetime import datetime
 
 import pytest
-import requests_mock
+from aiohttp import ClientSession
+from aioresponses import aioresponses
 from pydantic import ValidationError
+from tenacity import RetryError
 from tzlocal import get_localzone
 
-from pynoonlight import FailedRequestError, InvalidURLError
+from pynoonlight import FailedRequestError, InvalidURLError, _send_request
 from pynoonlight.dispatch import (
     SANDBOX_URL,
     Alarm,
@@ -148,10 +150,10 @@ class TestDispatch:
             location=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2),
         )
         with pytest.raises(FailedRequestError):
-            with requests_mock.Mocker() as m:
+            with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
                 m.post(
                     SANDBOX_URL.format(path=""),
-                    status_code=500,
+                    status=500,
                 )
                 await create_alarm(alarm_data, server_token="1234567890", sandbox=True)
 
@@ -197,25 +199,25 @@ class TestDispatch:
     async def test__cancel_alarm_sandbox(self) -> None:
         a: Alarm = await mock_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/status")
-        with requests_mock.Mocker() as m:
-            m.post(url, status_code=201)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(url, status=201)
             await a.cancel("1234")
             await a.cancel("1234")  # Should return immediately
-            assert m.call_count == 1
+            assert len(m._responses) == 1
 
     async def test__cancel_alarm_fail(self) -> None:
         a: Alarm = await mock_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/status")
-        with requests_mock.Mocker() as m:
-            m.post(url, status_code=500)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(url, status=500)
             with pytest.raises(FailedRequestError):
                 await a.cancel("1234")
 
     async def test__update_location(self) -> None:
         a: Alarm = await mock_dynamic_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/locations")
-        with requests_mock.Mocker() as m:
-            m.post(url, status_code=201)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(url, status=201)
             await a.update_location(
                 Coordinates(lat=12.34566789, lng=12.34567890, accuracy=2)
             )
@@ -223,8 +225,8 @@ class TestDispatch:
     async def test__update_location_fail(self) -> None:
         a: Alarm = await mock_dynamic_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/locations")
-        with requests_mock.Mocker() as m:
-            m.post(url, status_code=500)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(url, status=500)
             with pytest.raises(FailedRequestError):
                 await a.update_location(
                     Coordinates(lat=12.34566789, lng=12.34567890, accuracy=2)
@@ -233,8 +235,8 @@ class TestDispatch:
     async def test__create_events_naive_time(self) -> None:
         a: Alarm = await mock_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/events")
-        with requests_mock.Mocker() as m:
-            m.post(url, status_code=201)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(url, status=201)
             await a.create_events(
                 [
                     Event(
@@ -254,8 +256,8 @@ class TestDispatch:
     async def test__create_events_aware_time(self) -> None:
         a: Alarm = await mock_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/events")
-        with requests_mock.Mocker() as m:
-            m.post(url, status_code=201)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(url, status=201)
             event_time = datetime.now()
             event_time = event_time.replace(tzinfo=get_localzone())
 
@@ -278,8 +280,8 @@ class TestDispatch:
     async def test__create_events_fail(self) -> None:
         a: Alarm = await mock_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/events")
-        with requests_mock.Mocker() as m:
-            m.post(url, status_code=500)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(url, status=500)
             with pytest.raises(FailedRequestError):
                 await a.create_events(
                     [
@@ -300,8 +302,8 @@ class TestDispatch:
     async def test__create_people(self) -> None:
         a: Alarm = await mock_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/people")
-        with requests_mock.Mocker() as m:
-            m.post(url, status_code=201)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(url, status=201)
             await a.create_people(
                 [Person(name="Test Person 2", pin="5678", phone="10987654321")]
             )
@@ -309,8 +311,8 @@ class TestDispatch:
     async def test__create_people_fail(self) -> None:
         a: Alarm = await mock_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/people")
-        with requests_mock.Mocker() as m:
-            m.post(url, status_code=500)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(url, status=500)
             with pytest.raises(FailedRequestError):
                 await a.create_people(
                     [Person(name="Test Person 2", pin="5678", phone="10987654321")]
@@ -319,14 +321,26 @@ class TestDispatch:
     async def test__update_people(self) -> None:
         a: Alarm = await mock_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/people/test_owner_id")
-        with requests_mock.Mocker() as m:
-            m.put(url, status_code=200)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.put(url, status=200)
             await a.update_person({"height": {"unit": "INCHES", "value": "100"}})
 
     async def test__update_people_fail(self) -> None:
         a: Alarm = await mock_alarm()
         url = SANDBOX_URL.format(path="/test_alarm_id/people")
-        with requests_mock.Mocker() as m:
-            m.put(url, status_code=500)
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.put(url, status=500)
             with pytest.raises(FailedRequestError):
                 await a.update_person({"height": {"unit": "INCHES", "value": "100"}})
+
+    async def test__request_with_clientsession(self) -> None:
+        url = "https://example.com"
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.get(url, status=200)
+            await _send_request("GET", url, {}, {}, 200, ClientSession())
+
+    async def test__request_with_clientsession_fail(self) -> None:
+        url = "https://example.com"
+        with aioresponses() as m, pytest.raises(RetryError, match="FailedRequestError"):  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(url, status=500, repeat=True)
+            await _send_request("POST", url, {}, {}, 200, ClientSession())

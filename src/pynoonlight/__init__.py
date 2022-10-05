@@ -1,9 +1,11 @@
+"""Some parameters may appear as required. This is a [bug](https://github.com/mkdocstrings/pytkdocs/issues/123) with `mkdocstrings` (scroll down)"""
+
 from __future__ import annotations
 
-from typing import Any, Union
+from typing import Any, Optional, Union
 from urllib.parse import urlparse
 
-import requests
+import aiohttp
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 
@@ -22,11 +24,29 @@ async def _send_request(
     headers: dict[str, str],
     payload: Union[dict[Any, Any], list[dict[Any, Any]]],
     expected_code: int,
-) -> requests.Response:
-    response = requests.request(method, url, headers=headers, json=payload)
-    if response.status_code != expected_code:
-        raise FailedRequestError(response.text)
-    return response
+    session: Optional[aiohttp.ClientSession] = None,
+) -> aiohttp.ClientResponse:
+    if session:
+        async with session.request(method, url, headers=headers, data=payload) as resp:
+            if resp.status != expected_code:
+                raise FailedRequestError(await resp.text())
+
+            # Cache(?) the JSON response by calling resp.json()
+            await resp.json()
+
+            return resp
+    else:
+        async with aiohttp.ClientSession() as session:
+            async with session.request(
+                method, url, headers=headers, data=payload
+            ) as resp:
+                if resp.status != expected_code:
+                    raise FailedRequestError(await resp.text())
+
+                # Cache(?) the JSON response by calling resp.json()
+                await resp.json()
+
+                return resp
 
 
 def _parse_prod_url(url: str) -> str:
