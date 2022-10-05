@@ -69,7 +69,7 @@ async def mock_prod_alarm() -> Alarm:
     )
     with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
         m.post(
-            "https://api-test.noonlight.com/dispatch/v1/alarms",
+            "https://api.noonlight.com/dispatch/v1/alarms",
             status=201,
             payload={"id": "test_alarm_id", "owner_id": "test_owner_id"},
         )
@@ -77,6 +77,5 @@ async def mock_prod_alarm() -> Alarm:
             data=alarm_data,
             server_token="1234567890",
             sandbox=False,
-            prod_url="https://api-test.noonlight.com",
         )
         return a

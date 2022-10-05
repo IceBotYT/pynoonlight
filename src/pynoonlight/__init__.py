@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import Any, Optional, Union
-from urllib.parse import urlparse
 
 import aiohttp
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -47,26 +46,3 @@ async def _send_request(
                 await resp.json()
 
                 return resp
-
-
-def _parse_prod_url(url: str) -> str:
-    # Validate the prod URL
-    parsed_url = urlparse(url)
-
-    if parsed_url.scheme != "https":
-        raise InvalidURLError("Invalid or missing URL scheme (expected https)")
-
-    if not parsed_url.netloc.endswith(".noonlight.com"):
-        raise InvalidURLError("Invalid domain (expected ending with noonlight.com)")
-    return f"https://{parsed_url.netloc}/dispatch/v1/alarms"
-
-
-def _parse_tasks_prod_url(url: str) -> str:
-    parsed_url = urlparse(url)
-
-    if parsed_url.scheme != "https":
-        raise InvalidURLError("Invalid or missing URL scheme (expected https)")
-
-    if not parsed_url.netloc.endswith(".noonlight.com"):
-        raise InvalidURLError("Invalid domain (expected ending with noonlight.com)")
-    return f"https://{parsed_url.netloc}/tasks/v1/verifications"

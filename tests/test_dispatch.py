@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from tenacity import RetryError
 from tzlocal import get_localzone
 
-from pynoonlight import FailedRequestError, InvalidURLError, _send_request
+from pynoonlight import FailedRequestError, _send_request
 from pynoonlight.dispatch import (
     SANDBOX_URL,
     Alarm,
@@ -164,37 +164,7 @@ class TestDispatch:
         assert a
         assert a.id == "test_alarm_id"
         assert a.owner_id == "test_owner_id"
-        assert a.prod_url == "https://api-test.noonlight.com/dispatch/v1/alarms"
-
-    async def test__invalid_prod_url_scheme(self) -> None:
-        alarm_data = AlarmData(
-            name="Test Person",
-            phone="12345678901",
-            pin="1234",
-            location=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2),
-        )
-        with pytest.raises(InvalidURLError):
-            await create_alarm(
-                alarm_data,
-                server_token="1234567890",
-                sandbox=False,
-                prod_url="api-test.noonlight.com",
-            )
-
-    async def test__invalid_prod_url_domain(self) -> None:
-        alarm_data = AlarmData(
-            name="Test Person",
-            phone="12345678901",
-            pin="1234",
-            location=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2),
-        )
-        with pytest.raises(InvalidURLError):
-            await create_alarm(
-                alarm_data,
-                server_token="1234567890",
-                sandbox=False,
-                prod_url="https://example.com",
-            )
+        assert a.prod_url == "https://api.noonlight.com/dispatch/v1/alarms"
 
     async def test__cancel_alarm_sandbox(self) -> None:
         a: Alarm = await mock_alarm()

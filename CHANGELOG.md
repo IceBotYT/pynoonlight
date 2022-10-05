@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+- Removed the need to pass a production URL to create alarms/task
+
 ## [0.2.0] - 2022-10-05
 ### Fixed
 - Improve readability of README

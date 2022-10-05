@@ -8,9 +8,10 @@ import validators  # type: ignore # does not have types
 from pydantic import BaseModel, root_validator, validator
 from tenacity import RetryError
 
-from . import FailedRequestError, _parse_tasks_prod_url, _send_request
+from . import FailedRequestError, _send_request
 
 SANDBOX_URL = "https://api-sandbox.noonlight.com/tasks/v1/verifications"
+PRODUCTION_URL = "https://api.noonlight.com/tasks/v1/verifications"
 
 
 class PointOfInterest(BaseModel):
@@ -132,7 +133,6 @@ async def create_task(
     data: VerificationData,
     server_token: str,
     sandbox: bool = True,
-    prod_url: Optional[str] = None,
 ) -> str:
     """Create a verification request to verify a piece of media with a prompt
 
@@ -149,10 +149,10 @@ async def create_task(
     Returns:
         str: The task ID for the given task
     """
-    if sandbox or not prod_url:
+    if sandbox:
         url = SANDBOX_URL
     else:
-        url = _parse_tasks_prod_url(prod_url)
+        url = PRODUCTION_URL
 
     headers = {
         "Accept": "application/json",

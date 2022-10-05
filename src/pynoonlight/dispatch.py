@@ -11,9 +11,10 @@ from pydantic import BaseModel, validator
 from tenacity import RetryError
 from tzlocal import get_localzone_name
 
-from . import FailedRequestError, _parse_prod_url, _send_request
+from . import FailedRequestError, _send_request
 
 SANDBOX_URL = "https://api-sandbox.noonlight.com/dispatch/v1/alarms{path}"
+PRODUCTION_URL = "https://api.noonlight.com/dispatch/v1/alarms{path}"
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -431,7 +432,6 @@ async def create_alarm(
     data: AlarmData,
     server_token: str,
     sandbox: bool = True,
-    prod_url: Optional[str] = None,
     client_session: Optional[aiohttp.ClientSession] = None,
 ) -> Alarm:
     """Create a new alarm.
@@ -450,10 +450,10 @@ async def create_alarm(
     Returns:
         Alarm: The alarm
     """
-    if sandbox or not prod_url:
+    if sandbox:
         url = SANDBOX_URL.format(path="")
     else:
-        url = _parse_prod_url(prod_url)
+        url = PRODUCTION_URL.format(path="")
 
     headers = {
         "Accept": "application/json",
@@ -467,9 +467,7 @@ async def create_alarm(
         response = await _send_request(
             "POST", url, headers, payload, 201, client_session
         )
-        print("getting response data")
         response_data = await response.json()
-        print("yay")
     except RetryError as e:
         raise FailedRequestError from e
 

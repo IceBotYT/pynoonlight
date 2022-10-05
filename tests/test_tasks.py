@@ -79,10 +79,10 @@ class TestTasks:
             )
             await create_task(
                 VerificationData(
-                    prompt="Is this a person?",
+                    prompt="Is this a person? (TEST)",
                     expiration=30,
                     attachments=Video(
-                        url="https://security.some-home-software.com/video_clip_192052093_49039144.mp4",
+                        url="https://test.test.com/test.mp4",
                         media_type="video/mp4",
                     ),
                 ),
@@ -92,7 +92,7 @@ class TestTasks:
     async def test__create_task_prod(self) -> None:
         with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
             m.post(
-                "https://some-api.noonlight.com/tasks/v1/verifications",
+                "https://api.noonlight.com/tasks/v1/verifications",
                 payload={
                     "id": "test_task_id",
                     "prompt": "test_prompt",
@@ -104,35 +104,33 @@ class TestTasks:
             )
             await create_task(
                 VerificationData(
-                    prompt="Is this a person?",
+                    prompt="Is this a person? (TEST)",
                     expiration=30,
                     attachments=Video(
-                        url="https://security.some-home-software.com/video_clip_192052093_49039144.mp4",
+                        url="https://test.test.com/test.mp4",
                         media_type="video/mp4",
                     ),
                 ),
                 server_token="some_server_token",
                 sandbox=False,
-                prod_url="https://some-api.noonlight.com",
             )
 
     async def test__failed_request(self) -> None:
         with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
             m.post(
-                "https://some-api.noonlight.com/tasks/v1/verifications",
+                "https://api.noonlight.com/tasks/v1/verifications",
                 status=500,
             )
             with pytest.raises(FailedRequestError):
                 await create_task(
                     VerificationData(
-                        prompt="Is this a person?",
+                        prompt="Is this a person? (TEST)",
                         expiration=30,
                         attachments=Video(
-                            url="https://security.some-home-software.com/video_clip_192052093_49039144.mp4",
+                            url="https://test.test.com/test.mp4",
                             media_type="video/mp4",
                         ),
                     ),
                     server_token="some_server_token",
                     sandbox=False,
-                    prod_url="https://some-api.noonlight.com",
                 )
