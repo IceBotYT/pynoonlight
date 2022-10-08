@@ -463,6 +463,18 @@ async def create_alarm(
 
     payload = data.dict()
 
+    # Remove all values that are None
+    def iterate(dictionary: dict[str, Any]) -> None:
+        for key, val in dictionary.copy().items():
+            if isinstance(val, dict):
+                iterate(val)
+            else:
+                if val == "" or val is None or val is False:
+                    del dictionary[key]
+
+    iterate(payload)
+    iterate(payload)
+
     try:
         response = await _send_request(
             "POST", url, headers, payload, 201, client_session

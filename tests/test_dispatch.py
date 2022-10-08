@@ -314,3 +314,23 @@ class TestDispatch:
         with aioresponses() as m, pytest.raises(RetryError, match="FailedRequestError"):  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
             m.post(url, status=500, repeat=True)
             await _send_request("POST", url, {}, {}, 200, ClientSession())
+
+    async def test__request_with_none_values(self) -> None:
+        dictionary = {
+            "name": "Test",
+            "location": {
+                "line1": "1234 Test Street",
+                "state": "TEST",
+                "city": "Test City",
+                "zip": "12345",
+            },
+            "phone": "12345678901",
+            "pin": None,
+        }
+        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+            m.post(
+                "https://api-sandbox.noonlight.com/dispatch/v1/alarms",
+                status=201,
+                payload={"id": "123", "owner_id": "123"},
+            )
+            await create_alarm(AlarmData(**dictionary), "test_token", True)

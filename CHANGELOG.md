@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+- Remove `None` values before creating alarm
+
 ## [0.3.1] - 2022-10-08
 ### Fixed
 - Fixed JSON option in `_send_request`
