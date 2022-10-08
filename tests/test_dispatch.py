@@ -319,10 +319,12 @@ class TestDispatch:
         dictionary = {
             "name": "Test",
             "location": {
-                "line1": "1234 Test Street",
-                "state": "TEST",
-                "city": "Test City",
-                "zip": "12345",
+                "address": {
+                    "line1": "1234 Test Street",
+                    "state": "TEST",
+                    "city": "Test City",
+                    "zip": "12345",
+                }
             },
             "phone": "12345678901",
             "pin": None,

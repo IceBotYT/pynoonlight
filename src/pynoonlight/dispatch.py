@@ -90,6 +90,20 @@ class Instructions(BaseModel):
     entry: str
 
 
+class Location(BaseModel):
+    """
+    The location of the alarm.
+    At least one argument is required.
+
+    Args:
+        address (Address): The address of the alarm.
+        coordinates (Coordinates): The coordinates of the alarm.
+    """
+
+    address: Optional[Address]
+    coordinates: Optional[Coordinates]
+
+
 class AlarmData(BaseModel):
     """
     Alarm data passed on to Noonlight dispatchers.
@@ -109,7 +123,7 @@ class AlarmData(BaseModel):
     phone: str
     pin: Optional[str]
     owner_id: Optional[str]
-    location: Union[Address, Coordinates]
+    location: Location
     workflow: Optional[Workflow]
     services: Optional[Services]
     instructions: Optional[Instructions]
