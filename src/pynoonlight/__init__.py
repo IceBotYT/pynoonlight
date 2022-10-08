@@ -26,7 +26,7 @@ async def _send_request(
     session: Optional[aiohttp.ClientSession] = None,
 ) -> aiohttp.ClientResponse:
     if session:
-        async with session.request(method, url, headers=headers, data=payload) as resp:
+        async with session.request(method, url, headers=headers, json=payload) as resp:
             if resp.status != expected_code:
                 raise FailedRequestError(await resp.text())
 
@@ -37,7 +37,7 @@ async def _send_request(
     else:
         async with aiohttp.ClientSession() as session:
             async with session.request(
-                method, url, headers=headers, data=payload
+                method, url, headers=headers, json=payload
             ) as resp:
                 if resp.status != expected_code:
                     raise FailedRequestError(await resp.text())
