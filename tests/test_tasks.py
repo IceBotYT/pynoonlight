@@ -65,7 +65,7 @@ class TestTasks:
             Video(url="https://example.com/video.mp4", media_type="application/json")
 
     async def test__create_task_sandbox(self) -> None:
-        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+        with aioresponses() as m:
             m.post(
                 SANDBOX_URL,
                 payload={
@@ -90,7 +90,7 @@ class TestTasks:
             )
 
     async def test__create_task_prod(self) -> None:
-        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+        with aioresponses() as m:
             m.post(
                 "https://api.noonlight.com/tasks/v1/verifications",
                 payload={
@@ -116,7 +116,7 @@ class TestTasks:
             )
 
     async def test__failed_request(self) -> None:
-        with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+        with aioresponses() as m:
             m.post(
                 "https://api.noonlight.com/tasks/v1/verifications",
                 status=500,
