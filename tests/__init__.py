@@ -25,7 +25,7 @@ async def mock_alarm() -> Alarm:
             line1="1234 Street St", city="City", state="State", zip="12345"
         ),
     )
-    with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+    with aioresponses() as m:
         m.post(
             SANDBOX_URL.format(path=""),
             status=201,
@@ -46,7 +46,7 @@ async def mock_dynamic_alarm() -> Alarm:
         pin="1234",
         location=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2),
     )
-    with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+    with aioresponses() as m:
         m.post(
             SANDBOX_URL.format(path=""),
             status=201,
@@ -67,7 +67,7 @@ async def mock_prod_alarm() -> Alarm:
         pin="1234",
         location=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2),
     )
-    with aioresponses() as m:  # type: ignore # aioresponses has the fix in GitHub already, but they haven't released it to PyPI yet
+    with aioresponses() as m:
         m.post(
             "https://api.noonlight.com/dispatch/v1/alarms",
             status=201,
