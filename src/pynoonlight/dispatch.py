@@ -9,7 +9,6 @@ from typing import Any, Optional, Union
 import aiohttp
 from pydantic import BaseModel, validator
 from tenacity import RetryError
-from tzlocal import get_localzone_name
 
 from . import FailedRequestError, _send_request
 
@@ -73,10 +72,10 @@ class Services(BaseModel):
         other (bool): Other authorities requested
     """
 
-    police: bool
-    fire: bool
-    medical: bool
-    other: bool
+    police: bool | None = None
+    fire: bool | None = None
+    medical: bool | None = None
+    other: bool | None = None
 
 
 class Instructions(BaseModel):
@@ -351,22 +350,14 @@ class Alarm:
         """
         event_dicts: list[dict[str, Any]] = []
         for _, event in enumerate(events):
-            if isinstance(event.event_time, datetime) and (
-                event.event_time.tzinfo is None
-                or event.event_time.tzinfo.utcoffset(event.event_time) is None
-            ):
-                _LOGGER.warning(
-                    "Event time does not include time zone information, treating as if it is local time zone."
-                )
-                tz = get_localzone_name()
-                event.event_time = event.event_time.strftime(
-                    f"%m/%d/%Y, %-I:%M:%S %p {tz}"
-                )
-            elif isinstance(event.event_time, datetime):
-                event.event_time = event.event_time.strftime(
-                    "%m/%d/%Y, %-I:%M:%S %p %Z"
-                )
+            event.event_time = str(event.event_time).replace(" ", "T")
             event_dicts.append(event.dict())
+
+        for event_dict in event_dicts:
+            if event_dict["meta"]["device_id"] is None:
+                del event_dict["meta"]["device_id"]
+            if event_dict["meta"]["media"] is None:
+                del event_dict["meta"]["media"]
 
         url = (
             SANDBOX_URL.format(path=f"/{self.id}/events")
