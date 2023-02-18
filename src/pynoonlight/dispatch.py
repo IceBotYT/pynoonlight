@@ -72,10 +72,10 @@ class Services(BaseModel):
         other (bool): Other authorities requested
     """
 
-    police: bool | None = None
-    fire: bool | None = None
-    medical: bool | None = None
-    other: bool | None = None
+    police: Union[bool, None] = None
+    fire: Union[bool, None] = None
+    medical: Union[bool, None] = None
+    other: Union[bool, None] = None
 
 
 class Instructions(BaseModel):
