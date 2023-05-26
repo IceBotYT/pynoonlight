@@ -1,7 +1,0 @@
-diff a/mkdocs.yml b/mkdocs.yml	(rejected hunks)
-@@ -1,4 +1,4 @@
--site_name: pynoonlight
-+site_name: "pynoonlight"
- repo_url: https://github.com/IceBotYT/pynoonlight
- 
- theme:
