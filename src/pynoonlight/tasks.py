@@ -111,10 +111,10 @@ class VerificationData(BaseModel):
         webhook_url (str, optional): The webhook that will be invoked when the verification is complete. If none is provided, it will use the preconfigured webhook.
     """
 
-    id: Optional[str]
-    owner_id: Optional[str]
-    location_id: Optional[str]
-    device_id: Optional[str]
+    id: Optional[str] = None
+    owner_id: Optional[str] = None
+    location_id: Optional[str] = None
+    device_id: Optional[str] = None
     prompt: str
     expiration: int
     attachments: Union[List[Image], Video]

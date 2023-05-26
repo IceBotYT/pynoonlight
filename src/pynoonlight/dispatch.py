@@ -99,8 +99,8 @@ class Location(BaseModel):
         coordinates (Coordinates): The coordinates of the alarm.
     """
 
-    address: Optional[Address]
-    coordinates: Optional[Coordinates]
+    address: Optional[Address] = None
+    coordinates: Optional[Coordinates] = None
 
 
 class AlarmData(BaseModel):
@@ -120,12 +120,12 @@ class AlarmData(BaseModel):
 
     name: str
     phone: str
-    pin: Optional[str]
-    owner_id: Optional[str]
+    pin: Optional[str] = None
+    owner_id: Optional[str] = None
     location: Location
-    workflow: Optional[Workflow]
-    services: Optional[Services]
-    instructions: Optional[Instructions]
+    workflow: Optional[Workflow] = None
+    services: Optional[Services] = None
+    instructions: Optional[Instructions] = None
 
 
 class Event(BaseModel):
@@ -165,11 +165,11 @@ class EventMeta(BaseModel):
 
     attribute: str
     value: str
-    device_id: Optional[str]
+    device_id: Optional[str] = None
     device_model: str
     device_name: str
     device_manufacturer: str
-    media: Optional[str]
+    media: Optional[str] = None
 
     @validator("attribute", pre=True)
     def attribute_must_be(cls, v: str) -> str:
