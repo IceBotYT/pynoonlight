@@ -12,11 +12,13 @@ from tzlocal import get_localzone
 from pynoonlight import FailedRequestError, _send_request
 from pynoonlight.dispatch import (
     SANDBOX_URL,
+    Address,
     Alarm,
     AlarmData,
     Coordinates,
     Event,
     EventMeta,
+    Location,
     Person,
     create_alarm,
 )
@@ -147,7 +149,9 @@ class TestDispatch:
             name="Test Person",
             phone="12345678901",
             pin="1234",
-            location=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2),
+            location=Location(
+                coordinates=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2)
+            ),
         )
         with pytest.raises(FailedRequestError):
             with aioresponses() as m:
@@ -316,23 +320,23 @@ class TestDispatch:
             await _send_request("POST", url, {}, {}, 200, ClientSession())
 
     async def test__request_with_none_values(self) -> None:
-        dictionary = {
-            "name": "Test",
-            "location": {
-                "address": {
-                    "line1": "1234 Test Street",
-                    "state": "TEST",
-                    "city": "Test City",
-                    "zip": "12345",
-                }
-            },
-            "phone": "12345678901",
-            "pin": None,
-        }
+        alarm_data = AlarmData(
+            name="Test",
+            location=Location(
+                address=Address(
+                    line1="1234 Test Street",
+                    state="TEST",
+                    city="Test City",
+                    zip="12345",
+                )
+            ),
+            phone="12345678901",
+            pin=None,
+        )
         with aioresponses() as m:
             m.post(
                 "https://api-sandbox.noonlight.com/dispatch/v1/alarms",
                 status=201,
                 payload={"id": "123", "owner_id": "123"},
             )
-            await create_alarm(AlarmData(**dictionary), "test_token", True)
+            await create_alarm(alarm_data, "test_token", True)

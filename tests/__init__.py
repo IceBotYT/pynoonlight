@@ -10,6 +10,7 @@ from pynoonlight.dispatch import (
     Alarm,
     AlarmData,
     Coordinates,
+    Location,
     create_alarm,
 )
 
@@ -21,8 +22,10 @@ async def mock_alarm() -> Alarm:
         name="Test Person",
         phone="12345678901",
         pin="1234",
-        location=Address(
-            line1="1234 Street St", city="City", state="State", zip="12345"
+        location=Location(
+            address=Address(
+                line1="1234 Street St", city="City", state="State", zip="12345"
+            )
         ),
     )
     with aioresponses() as m:
@@ -44,7 +47,9 @@ async def mock_dynamic_alarm() -> Alarm:
         name="Test Person",
         phone="12345678901",
         pin="1234",
-        location=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2),
+        location=Location(
+            coordinates=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2)
+        ),
     )
     with aioresponses() as m:
         m.post(
@@ -65,7 +70,9 @@ async def mock_prod_alarm() -> Alarm:
         name="Test Person",
         phone="12345678901",
         pin="1234",
-        location=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2),
+        location=Location(
+            coordinates=Coordinates(lat=12.34567890, lng=12.34567890, accuracy=2)
+        ),
     )
     with aioresponses() as m:
         m.post(

@@ -111,14 +111,14 @@ class VerificationData(BaseModel):
         webhook_url (str, optional): The webhook that will be invoked when the verification is complete. If none is provided, it will use the preconfigured webhook.
     """
 
-    id: Optional[str]
-    owner_id: Optional[str]
-    location_id: Optional[str]
-    device_id: Optional[str]
+    id: Optional[str] = None
+    owner_id: Optional[str] = None
+    location_id: Optional[str] = None
+    device_id: Optional[str] = None
     prompt: str
     expiration: int
     attachments: Union[List[Image], Video]
-    webhook_url: Optional[str]
+    webhook_url: Optional[str] = None
 
 
 class TaskResponse(BaseModel):
@@ -149,11 +149,7 @@ async def create_task(
     Returns:
         str: The task ID for the given task
     """
-    if sandbox:
-        url = SANDBOX_URL
-    else:
-        url = PRODUCTION_URL
-
+    url = SANDBOX_URL if sandbox else PRODUCTION_URL
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
