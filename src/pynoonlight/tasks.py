@@ -118,7 +118,7 @@ class VerificationData(BaseModel):
     prompt: str
     expiration: int
     attachments: Union[List[Image], Video]
-    webhook_url: Optional[str]
+    webhook_url: Optional[str] = None
 
 
 class TaskResponse(BaseModel):
