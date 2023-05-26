@@ -149,11 +149,7 @@ async def create_task(
     Returns:
         str: The task ID for the given task
     """
-    if sandbox:
-        url = SANDBOX_URL
-    else:
-        url = PRODUCTION_URL
-
+    url = SANDBOX_URL if sandbox else PRODUCTION_URL
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",

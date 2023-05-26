@@ -173,7 +173,7 @@ class EventMeta(BaseModel):
 
     @validator("attribute", pre=True)
     def attribute_must_be(cls, v: str) -> str:
-        if v not in [
+        if v in {
             "smoke",
             "camera",
             "lock",
@@ -182,12 +182,12 @@ class EventMeta(BaseModel):
             "network_connection",
             "water_leak",
             "freeze",
-        ]:
+        }:
+            return v
+        else:
             raise ValueError(
                 "must be one of 'smoke', 'camera', 'lock', 'contact', 'motion', 'network_connection', 'water_leak', 'freeze'"
             )
-
-        return v
 
     @validator("value")
     def value_must_be(cls, v: str, values: dict[str, str]) -> Optional[str]:
@@ -349,7 +349,7 @@ class Alarm:
             FailedRequestError: Raised when the request to create the event(s) has failed.
         """
         event_dicts: list[dict[str, Any]] = []
-        for _, event in enumerate(events):
+        for event in events:
             event.event_time = str(event.event_time).replace(" ", "T")
             event_dicts.append(event.dict())
 
