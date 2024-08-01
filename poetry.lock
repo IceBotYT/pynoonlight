@@ -563,13 +563,13 @@ files = [
 
 [[package]]
 name = "exceptiongroup"
-version = "1.2.1"
+version = "1.2.2"
 description = "Backport of PEP 654 (exception groups)"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "exceptiongroup-1.2.1-py3-none-any.whl", hash = "sha256:5258b9ed329c5bbdd31a309f53cbfb0b155341807f6ff7606a1e801a891b29ad"},
-    {file = "exceptiongroup-1.2.1.tar.gz", hash = "sha256:a4785e48b045528f5bfe627b6ad554ff32def154f42372786903b7abcfe1aa16"},
+    {file = "exceptiongroup-1.2.2-py3-none-any.whl", hash = "sha256:3111b9d131c238bec2f8f516e123e14ba243563fb135d3fe885990585aa7795b"},
+    {file = "exceptiongroup-1.2.2.tar.gz", hash = "sha256:47c2edf7c6738fafb49fd34290706d1a1a2f4d1c6df275526b62cbb4aa5393cc"},
 ]
 
 [package.extras]
@@ -1675,13 +1675,13 @@ six = ">=1.5"
 
 [[package]]
 name = "python-kacl"
-version = "0.4.6"
+version = "0.5.1"
 description = "Python module and CLI tool for validating and modifying Changelogs in \"keep-a-changelog\" format\""
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "python-kacl-0.4.6.tar.gz", hash = "sha256:01b85a307d063f53a0dd0c556f4ca32b284e6a28ba5b0824e0b8d9108df23a09"},
-    {file = "python_kacl-0.4.6-py3-none-any.whl", hash = "sha256:630bdde1b0d23817717b877eddfeb2eacd4889f54e9a39164180f29769a9c7c8"},
+    {file = "python_kacl-0.5.1-py3-none-any.whl", hash = "sha256:2a74bea7734dc1ac053e36b23ee2410eb053dfa1f824139ccd9185e89653781e"},
+    {file = "python_kacl-0.5.1.tar.gz", hash = "sha256:a7d7dfea1134fc1c5861811be88ed8c780c11fe0feb1e37e5453e3ffdce3c3e1"},
 ]
 
 [package.dependencies]
