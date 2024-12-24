@@ -31,7 +31,6 @@ pip install pynoonlight
 * Clone this repository
 * Requirements:
   * [Poetry](https://python-poetry.org/)
-  * Python 3.7
   * Python 3.10
 
 * Setup virtual environments
@@ -39,7 +38,6 @@ pip install pynoonlight
 > This will modify your `.bashrc` file to create two new aliases to point to the virtual environments.
 > The two new aliases are:
 > - noonlight_python3.10
-> - noonlight_python3.7
 
 ```sh
 cd pynoonlight
@@ -51,11 +49,6 @@ chmod +x setup_virtual_environments.sh
 
 ```sh
 noonlight_python3.10
-```
-
-* Activate the virtual environment (Python 3.7)
-```sh
-noonlight_python3.7
 ```
 
 ### Testing
