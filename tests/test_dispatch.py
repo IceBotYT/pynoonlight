@@ -28,7 +28,7 @@ from . import mock_alarm, mock_dynamic_alarm, mock_prod_alarm
 
 class TestDispatch:
     def test__event_type_must_be_fail(self) -> None:
-        Event.update_forward_refs()
+        # Event.update_forward_refs()
         with pytest.raises(ValidationError):
             Event(
                 event_type="some.nonexistent.event_type",
@@ -43,7 +43,7 @@ class TestDispatch:
             )
 
     def test__event_creation(self) -> None:
-        Event.update_forward_refs()
+        # Event.update_forward_refs()
         Event(
             event_type="alarm.device.activated_alarm",
             event_time=datetime.now(),
@@ -57,7 +57,7 @@ class TestDispatch:
         )
 
     def test__attribute_must_be(self) -> None:
-        Event.update_forward_refs()
+        # Event.update_forward_refs()
         with pytest.raises(ValidationError):
             EventMeta(
                 attribute="asdf",
@@ -80,7 +80,7 @@ class TestDispatch:
         ],
     )
     def test__value_must_be(self, attribute_to_test: str) -> None:
-        Event.update_forward_refs()
+        # Event.update_forward_refs()
         with pytest.raises(ValidationError):
             EventMeta(
                 attribute=attribute_to_test,
@@ -100,7 +100,7 @@ class TestDispatch:
         ],
     )
     def test__value_success(self, attribute_to_test: str, value: str) -> None:
-        Event.update_forward_refs()
+        # Event.update_forward_refs()
         meta = EventMeta(
             attribute=attribute_to_test,
             value=value,
@@ -112,7 +112,7 @@ class TestDispatch:
         assert meta.value == value
 
     def test__media_cannot_exist(self) -> None:
-        Event.update_forward_refs()
+        # Event.update_forward_refs()
         with pytest.raises(ValidationError):
             EventMeta(
                 attribute="smoke",
@@ -124,7 +124,7 @@ class TestDispatch:
             )
 
     def test__media_exist_success(self) -> None:
-        Event.update_forward_refs()
+        # Event.update_forward_refs()
         meta = EventMeta(
             attribute="camera",
             value="unknown",

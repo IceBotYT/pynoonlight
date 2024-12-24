@@ -5,9 +5,10 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from typing import Any, Optional, Union
+from typing_extensions import Self
 
 import aiohttp
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator, model_validator
 from tenacity import RetryError
 
 from . import FailedRequestError, _send_request
@@ -143,7 +144,7 @@ class Event(BaseModel):
     event_time: Union[datetime, str]
     meta: EventMeta
 
-    @validator("event_type")
+    @field_validator("event_type")
     def event_type_must_be(cls, v: str) -> str:
         if v in {
             "alarm.device.activated_alarm",
@@ -171,7 +172,7 @@ class EventMeta(BaseModel):
     device_manufacturer: str
     media: Optional[str] = None
 
-    @validator("attribute", pre=True)
+    @field_validator("attribute", mode='before')
     def attribute_must_be(cls, v: str) -> str:
         if v in {
             "smoke",
@@ -189,10 +190,18 @@ class EventMeta(BaseModel):
                 "must be one of 'smoke', 'camera', 'lock', 'contact', 'motion', 'network_connection', 'water_leak', 'freeze'"
             )
 
-    @validator("value")
-    def value_must_be(cls, v: str, values: dict[str, str]) -> Optional[str]:
+    @model_validator(mode="after")
+    def media_cannot_exist_if(self) -> Self:
+        attribute = self.attribute or None
+        if attribute == "camera" or not self.media and self.media is None:
+            return self
+        else:
+            raise ValueError("cannot be used when attribute is not 'camera'")
+    
+    @model_validator(mode="after")
+    def value_must_be(self) -> Self:
         try:
-            attribute = values["attribute"]
+            attribute = self.attribute
         except KeyError:
             attribute = None
         if attribute is not None:
@@ -206,21 +215,11 @@ class EventMeta(BaseModel):
                 "freeze": ["detected", "cleared"],
                 "network_connection": ["lost", "established"],
             }
-            if v not in value_should_be[attribute]:
+            if self.value not in value_should_be[attribute]:
                 raise ValueError(
                     f"must be one of {','.join(value_should_be[attribute])}"
                 )
-            return v
-
-        return None
-
-    @validator("media")
-    def media_cannot_exist_if(cls, v: str, values: dict[str, str]) -> Optional[str]:
-        attribute = values["attribute"] or None
-        if attribute == "camera" or not v and v is None:
-            return v
-        else:
-            raise ValueError("cannot be used when attribute is not 'camera'")
+        return self
 
 
 class Person(BaseModel):
@@ -330,7 +329,7 @@ class Alarm:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self._token}",
         }
-        payload = coordinates.dict()
+        payload = coordinates.model_dump()
 
         try:
             await _send_request("POST", url, headers, payload, 201, self._session)
@@ -351,7 +350,7 @@ class Alarm:
         event_dicts: list[dict[str, Any]] = []
         for event in events:
             event.event_time = str(event.event_time).replace(" ", "T")
-            event_dicts.append(event.dict())
+            event_dicts.append(event.model_dump())
 
         for event_dict in event_dicts:
             if event_dict["meta"]["device_id"] is None:
@@ -386,7 +385,7 @@ class Alarm:
         Raises:
             FailedRequestError: Raised when the request to add the people failed.
         """
-        people_dicts = [person.dict() for person in people]
+        people_dicts = [person.model_dump() for person in people]
         url = (
             SANDBOX_URL.format(path=f"/{self.id}/people")
             if self.sandbox
@@ -466,7 +465,7 @@ async def create_alarm(
         "Authorization": f"Bearer {server_token}",
     }
 
-    payload = data.dict()
+    payload = data.model_dump()
 
     # Remove all values that are None
     def iterate(dictionary: dict[str, Any]) -> None:

@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from typing import Dict, List, Optional, Union
+from typing_extensions import Self
 
 import validators  # type: ignore # does not have types
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, model_validator, field_validator
 from tenacity import RetryError
 
 from . import FailedRequestError, _send_request
@@ -32,11 +33,11 @@ class PointOfInterest(BaseModel):
     y: int
     dy: int
 
-    @root_validator()
-    def verify_values(cls, values: dict[str, int]) -> dict[str, int]:
-        if any(elem < 0 for elem in values.values()):
+    @model_validator(mode='after')
+    def verify_values(self) -> Self:
+        if any(elem < 0 for elem in [self.x, self.dx, self.y, self.dy]):
             raise ValueError("all dictionary values must be non-negative")
-        return values
+        return self
 
 
 class Image(BaseModel):
@@ -52,7 +53,7 @@ class Image(BaseModel):
     media_type: str
     points_of_interest: List[PointOfInterest]
 
-    @validator("url")
+    @field_validator("url")
     def url_valid(cls, v: str) -> str:
         result = validators.url(v)
 
@@ -61,7 +62,7 @@ class Image(BaseModel):
 
         return v
 
-    @validator("media_type")
+    @field_validator("media_type")
     def media_type_valid(cls, v: str) -> str:
         if v in {"image/jpeg", "image/png", "image/jpg"}:
             return v
@@ -80,7 +81,7 @@ class Video(BaseModel):
     url: str
     media_type: str
 
-    @validator("url")
+    @field_validator("url")
     def url_valid(cls, v: str) -> str:
         result = validators.url(v)
 
@@ -89,7 +90,7 @@ class Video(BaseModel):
 
         return v
 
-    @validator("media_type")
+    @field_validator("media_type")
     def media_type_valid(cls, v: str) -> str:
         if v in {"video/mp4", "application/x-mpegURL"}:
             return v
@@ -156,7 +157,7 @@ async def create_task(
         "Authorization": f"Bearer {server_token}",
     }
 
-    payload = data.dict()
+    payload = data.model_dump()
     payload["expiration"] = {"timeout": data.expiration}
 
     try:
