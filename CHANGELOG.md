@@ -6,9 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ## [0.4.4] - 2024-12-24
+### Removed
+- Dropped support for Python 3.7
+
+### Fixed
+- Updated pydantic to v2
+
 ### Security
-- Resolve Dependabot alert #5
-- Resolve Depandabot alert #6
+- Resolved several Dependabot alerts
 
 ## [0.4.3] - 2023-02-18
 ### Fixed
@@ -78,4 +83,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 [0.3.0]: https://github.com/IceBotYT/pynoonlight/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/IceBotYT/pynoonlight/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/IceBotYT/pynoonlight/tree/0.1.0
-
