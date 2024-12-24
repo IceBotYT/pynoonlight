@@ -5,11 +5,11 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from typing import Any, Optional, Union
-from typing_extensions import Self
 
 import aiohttp
 from pydantic import BaseModel, field_validator, model_validator
 from tenacity import RetryError
+from typing_extensions import Self
 
 from . import FailedRequestError, _send_request
 
@@ -145,7 +145,7 @@ class Event(BaseModel):
     meta: EventMeta
 
     @field_validator("event_type")
-    def event_type_must_be(cls, v: str) -> str:
+    def event_type_must_be(self, v: str) -> str:
         if v in {
             "alarm.device.activated_alarm",
             "alarm.person.activated_alarm",
@@ -172,8 +172,8 @@ class EventMeta(BaseModel):
     device_manufacturer: str
     media: Optional[str] = None
 
-    @field_validator("attribute", mode='before')
-    def attribute_must_be(cls, v: str) -> str:
+    @field_validator("attribute", mode="before")
+    def attribute_must_be(self, v: str) -> str:
         if v in {
             "smoke",
             "camera",
@@ -197,7 +197,7 @@ class EventMeta(BaseModel):
             return self
         else:
             raise ValueError("cannot be used when attribute is not 'camera'")
-    
+
     @model_validator(mode="after")
     def value_must_be(self) -> Self:
         try:

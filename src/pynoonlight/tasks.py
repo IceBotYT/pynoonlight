@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from typing import Dict, List, Optional, Union
-from typing_extensions import Self
 
 import validators  # type: ignore # does not have types
-from pydantic import BaseModel, model_validator, field_validator
+from pydantic import BaseModel, field_validator, model_validator
 from tenacity import RetryError
+from typing_extensions import Self
 
 from . import FailedRequestError, _send_request
 
@@ -33,7 +33,7 @@ class PointOfInterest(BaseModel):
     y: int
     dy: int
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def verify_values(self) -> Self:
         if any(elem < 0 for elem in [self.x, self.dx, self.y, self.dy]):
             raise ValueError("all dictionary values must be non-negative")
@@ -54,7 +54,7 @@ class Image(BaseModel):
     points_of_interest: List[PointOfInterest]
 
     @field_validator("url")
-    def url_valid(cls, v: str) -> str:
+    def url_valid(self, v: str) -> str:
         result = validators.url(v)
 
         if isinstance(result, validators.ValidationFailure):
@@ -63,7 +63,7 @@ class Image(BaseModel):
         return v
 
     @field_validator("media_type")
-    def media_type_valid(cls, v: str) -> str:
+    def media_type_valid(self, v: str) -> str:
         if v in {"image/jpeg", "image/png", "image/jpg"}:
             return v
         else:
@@ -82,7 +82,7 @@ class Video(BaseModel):
     media_type: str
 
     @field_validator("url")
-    def url_valid(cls, v: str) -> str:
+    def url_valid(self, v: str) -> str:
         result = validators.url(v)
 
         if isinstance(result, validators.ValidationFailure):
@@ -91,7 +91,7 @@ class Video(BaseModel):
         return v
 
     @field_validator("media_type")
-    def media_type_valid(cls, v: str) -> str:
+    def media_type_valid(self, v: str) -> str:
         if v in {"video/mp4", "application/x-mpegURL"}:
             return v
         else:
