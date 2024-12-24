@@ -54,7 +54,8 @@ class Image(BaseModel):
     points_of_interest: List[PointOfInterest]
 
     @field_validator("url")
-    def url_valid(self, v: str) -> str:
+    @classmethod
+    def url_valid(cls, v: str) -> str:
         result = validators.url(v)
 
         if isinstance(result, validators.ValidationFailure):
@@ -63,7 +64,8 @@ class Image(BaseModel):
         return v
 
     @field_validator("media_type")
-    def media_type_valid(self, v: str) -> str:
+    @classmethod
+    def media_type_valid(cls, v: str) -> str:
         if v in {"image/jpeg", "image/png", "image/jpg"}:
             return v
         else:
@@ -82,7 +84,8 @@ class Video(BaseModel):
     media_type: str
 
     @field_validator("url")
-    def url_valid(self, v: str) -> str:
+    @classmethod
+    def url_valid(cls, v: str) -> str:
         result = validators.url(v)
 
         if isinstance(result, validators.ValidationFailure):
@@ -91,7 +94,8 @@ class Video(BaseModel):
         return v
 
     @field_validator("media_type")
-    def media_type_valid(self, v: str) -> str:
+    @classmethod
+    def media_type_valid(cls, v: str) -> str:
         if v in {"video/mp4", "application/x-mpegURL"}:
             return v
         else:

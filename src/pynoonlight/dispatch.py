@@ -145,7 +145,8 @@ class Event(BaseModel):
     meta: EventMeta
 
     @field_validator("event_type")
-    def event_type_must_be(self, v: str) -> str:
+    @classmethod
+    def event_type_must_be(cls, v: str) -> str:
         if v in {
             "alarm.device.activated_alarm",
             "alarm.person.activated_alarm",
@@ -173,7 +174,8 @@ class EventMeta(BaseModel):
     media: Optional[str] = None
 
     @field_validator("attribute", mode="before")
-    def attribute_must_be(self, v: str) -> str:
+    @classmethod
+    def attribute_must_be(cls, v: str) -> str:
         if v in {
             "smoke",
             "camera",
